@@ -26,9 +26,7 @@ pipeline {
 	
 	stage('ZICOS-Initialization'){
             when {
-                expression { 
-			return params.CALLED_BY != 'ZICOS';
-		}
+                expression {  params.CALLED_BY != 'ZICOS' }
             }
             steps {
                 sh "curl -X GET ${params.URL}/pipeline/execution?url=${JENKINS_URL}&jobName=${JOB_NAME}"
