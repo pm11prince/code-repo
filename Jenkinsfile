@@ -43,7 +43,7 @@ pipeline {
   try {
   if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
 			{
-			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Started: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Push artifacts to Artifactory]")
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Started: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}].")
 			}
   checkout(	[$class                          : 'GitSCM',
 				  branches                         : [[name: '*/master']],
