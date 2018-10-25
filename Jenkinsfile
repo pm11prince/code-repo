@@ -26,7 +26,9 @@ pipeline {
 	
 	stage('ZICOS-Initialization'){
             when {
-                expression {  params.CALLED_BY != 'ZICOS' }
+                expression { 
+			return params.CALLED_BY != 'ZICOS';
+		}
             }
             steps {
                 sh "curl -X GET ${params.URL}/pipeline/execution?url=${JENKINS_URL}&jobName=${JOB_NAME}"
@@ -41,7 +43,7 @@ pipeline {
   try {
   if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
 			{
-			notifySlack(${params.SLACK_API_URL},${params.SLACK_CHANNEL_NAME},${params.SLACK_TOKEN},"Build Started: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Push artifacts to Artifactory]")
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN},"Build Started: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Push artifacts to Artifactory]")
 			}
   checkout(	[$class                          : 'GitSCM',
 				  branches                         : [[name: '*/master']],
@@ -61,7 +63,7 @@ pipeline {
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
 			{
-			notifySlack(${params.SLACK_API_URL},${params.SLACK_CHANNEL_NAME},${params.SLACK_TOKEN},"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Build & push image]")
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Build & push image]")
 			}
 			if (params.EMAIL_LIST?.trim())
 			{
@@ -89,7 +91,7 @@ pipeline {
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
 			{
-			notifySlack(${params.SLACK_API_URL},${params.SLACK_CHANNEL_NAME},${params.SLACK_TOKEN},"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Create Bridge]")
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Create Bridge]")
 			}
 			if (params.EMAIL_LIST?.trim())
 			{
@@ -124,7 +126,7 @@ pipeline {
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
 			{
-			notifySlack(${params.SLACK_API_URL},${params.SLACK_CHANNEL_NAME},${params.SLACK_TOKEN},"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Checkout code]")
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Checkout code]")
 			}
 			if (params.EMAIL_LIST?.trim())
 			{
@@ -166,7 +168,7 @@ pipeline {
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
 			{
-			notifySlack(${params.SLACK_API_URL},${params.SLACK_CHANNEL_NAME},${params.SLACK_TOKEN},"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Build NPM]")
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Build NPM]")
 			}
 			if (params.EMAIL_LIST?.trim())
 			{
@@ -226,7 +228,7 @@ pipeline {
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
 			{
-			notifySlack(${params.SLACK_API_URL},${params.SLACK_CHANNEL_NAME},${params.SLACK_TOKEN},"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Sonar Analysis]")
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Sonar Analysis]")
 			}
 			if (params.EMAIL_LIST?.trim())
 			{
@@ -265,7 +267,7 @@ pipeline {
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
 			{
-			notifySlack(${params.SLACK_API_URL},${params.SLACK_CHANNEL_NAME},${params.SLACK_TOKEN},"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Unit testing using mocha]")
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Unit testing using mocha]")
 			}
 			if (params.EMAIL_LIST?.trim())
 			{
@@ -308,7 +310,7 @@ pipeline {
 				}
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
 			{
-			notifySlack(${params.SLACK_API_URL},${params.SLACK_CHANNEL_NAME},${params.SLACK_TOKEN},"Build Success: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]")
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Success: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]")
 			}
 			if (params.EMAIL_LIST?.trim())
 			{
@@ -319,7 +321,7 @@ pipeline {
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
 			{
-			notifySlack(${params.SLACK_API_URL},${params.SLACK_CHANNEL_NAME},${params.SLACK_TOKEN},"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Push artifacts to Artifactory]")
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Push artifacts to Artifactory]")
 			}
 			if (params.EMAIL_LIST?.trim())
 			{
