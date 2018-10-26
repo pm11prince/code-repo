@@ -33,7 +33,11 @@ if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CH
             
 			if (params.CALLED_BY != 'ZICOS')
             {
-                sh "curl -X GET ${params.URL}/pipeline/execution?url=${JENKINS_URL}&jobName=${JOB_NAME}"
+               withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${param.ZICOS_CREDENTIAL_ID}",
+                    usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        def url = "${JENKINS_URL}".substring(0, "${JENKINS_URL}".length() - 1)
+                        sh "curl --user $USERNAME:$PASSWORD -X GET ${params.URL}/pipeline/execution?url=${url}'&'jobName=${JOB_NAME}"
+					}
             }
         }
 		} catch (e) {
