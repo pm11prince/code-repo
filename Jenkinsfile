@@ -30,12 +30,9 @@ if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CH
 			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Started: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}].")
 			}
 	stage('ZICOS-Initialization'){
-            when {
-                expression { 
-			return params.CALLED_BY != 'ZICOS';
-		}
-            }
-            steps {
+            
+			if (params.CALLED_BY != 'ZICOS')
+            {
                 sh "curl -X GET ${params.URL}/pipeline/execution?url=${JENKINS_URL}&jobName=${JOB_NAME}"
             }
         }
