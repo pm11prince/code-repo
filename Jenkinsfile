@@ -52,6 +52,15 @@ if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CH
 			}
 	try {		
   stage('Build image') {
+  
+		checkout(	[$class                          : 'GitSCM',
+				  branches                         : [[name: '*/master']],
+				  doGenerateSubmoduleConfigurations: false,
+				  extensions                       : [],
+				  submoduleCfg                     : [],
+				  userRemoteConfigs                : [[credentialsId: "${params.GIT_CREDENTIAL_ID}",
+				  url          					   : "${params.GIT_URL}"]]])
+			 
         
 		app = docker.build("${params.DOCKER_IMAGE_NAME}:${params.DOCKER_TAG}")
     }
