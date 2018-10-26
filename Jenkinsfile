@@ -30,13 +30,16 @@ pipeline {
 			return params.CALLED_BY != 'ZICOS';
 		}
             }
+			steps { 
             script{
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${param.ZICOS_CREDENTIAL_ID}",
                     usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                         def url = "${JENKINS_URL}".substring(0, "${JENKINS_URL}".length() - 1)
                         sh "curl --user $USERNAME:$PASSWORD -X GET ${params.URL}/pipeline/execution?url=${url}'&'jobName=${JOB_NAME}"
 					}
-        }
+			}
+		}
+	}
 
   stage('Build & push image') {
   
