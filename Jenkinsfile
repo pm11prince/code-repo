@@ -1,29 +1,34 @@
 #!/usr/bin/env groovy
-def app
-pipeline {
-  agent any
-  //All parameters which will be used to run the pipeline.
-  parameters {
-		string(name: 'DOCKERHUB_URL', defaultValue: '', description: 'Dockerhub Url')
-        string(name: 'DOCKERHUB_CREDETIAL_ID', defaultValue: '', description: 'Dockerhub CredentialId')
-		string(name: 'GIT_CREDETIAL_ID', defaultValue: '', description: 'Dockerhub CredentialId')
-		string(name: 'DOCKER_IMAGE_NAME', defaultValue: '', description: 'Docker Image Name')
-		string(name: 'DOCKER_TAG', defaultValue: '', description: 'Docker Image Tag')
-		string(name: 'GIT_URL', defaultValue: '', description: 'Git Url')
-		string(name: 'SONARQUBE_URL', defaultValue: '', description: 'SonarQube Url')
-		string(name: 'SONARQUBE_PROJECT_NAME', defaultValue: '', description: 'SonarQube Project Name')
-		string(name: 'JFROG_CREDENTIAL_ID', defaultValue: '', description: 'JFrog repository CredentialId')
-		string(name: 'JFROG_URL', defaultValue: '', description: 'JFrog repository URL')
-		string(name: 'SLACK_API_URL', defaultValue: '', description: 'Slack API URL')
-		string(name: 'SLACK_TOKEN', defaultValue: '', description: 'Slack token')
-		string(name: 'SLACK_CHANNEL_NAME', defaultValue: '', description: 'Slack channel name')
-		string(name: 'EMAIL_LIST', defaultValue: '', description: 'Email distribution list')
-		string(name: 'CALLED_BY', defaultValue: '', description: 'Called by')
-        string(name: 'URL', defaultValue: '',description: 'Callback URL')
 
-		}
-  stages {
+node {
+
+    def app
 	
+	properties([
+     parameters([
+	    stringParam(name: 'DOCKERHUB_URL', defaultValue: '', description: 'Dockerhub Url'),
+        stringParam(name: 'DOCKERHUB_CREDENTIAL_ID', defaultValue: '', description: 'Dockerhub CredentialId'),
+		stringParam(name: 'GIT_CREDENTIAL_ID', defaultValue: '', description: 'GIT CredentialId'),
+		stringParam(name: 'DOCKER_IMAGE_NAME', defaultValue: '', description: 'Docker Image Name'),
+		stringParam(name: 'DOCKER_TAG', defaultValue: '', description: 'Docker Image Tag'),
+		stringParam(name: 'GIT_URL', defaultValue: '', description: 'Git Url'),
+		stringParam(name: 'SONARQUBE_URL', defaultValue: '', description: 'SonarQube Url'),
+		stringParam(name: 'SONARQUBE_PROJECT_NAME', defaultValue: '', description: 'SonarQube Project Name'),
+		stringParam(name: 'JFROG_CREDENTIAL_ID', defaultValue: '', description: 'JFrog repository password'),
+		stringParam(name: 'JFROG_URL', defaultValue: '', description: 'JFrog repository URL')
+		stringParam(name: 'SLACK_API_URL', defaultValue: '', description: 'Slack API URL')
+		stringParam(name: 'SLACK_TOKEN', defaultValue: '', description: 'Slack token')
+		stringParam(name: 'SLACK_CHANNEL_NAME', defaultValue: '', description: 'Slack channel name')
+		stringParam(name: 'EMAIL_LIST', defaultValue: '', description: 'Email distribution list')
+		stringParam(name: 'CALLED_BY', defaultValue: '', description: 'Called by')
+        stringParam(name: 'URL', defaultValue: '',description: 'Callback URL')
+     ])
+   ])
+	try {
+if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
+			{
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Started: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}].")
+			}
 	stage('ZICOS-Initialization'){
             when {
                 expression { 
@@ -34,59 +39,72 @@ pipeline {
                 sh "curl -X GET ${params.URL}/pipeline/execution?url=${JENKINS_URL}&jobName=${JOB_NAME}"
             }
         }
-
-  stage('Build & push image') {
-  
-  steps { 
-  script {
-  
-  try {
-  if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
-			{
-			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Started: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}].")
-			}
-  checkout(	[$class                          : 'GitSCM',
-				  branches                         : [[name: '*/master']],
-				  doGenerateSubmoduleConfigurations: false,
-				  extensions                       : [],
-				  submoduleCfg                     : [],
-				  userRemoteConfigs                : [[credentialsId: "${params.GIT_CREDETIAL_ID}",
-				  url          					   : "${params.GIT_URL}"]]])
-        app = docker.build("${params.DOCKER_IMAGE_NAME}:${params.DOCKER_TAG}")
-		docker.withRegistry("${params.DOCKERHUB_URL}", "${params.DOCKERHUB_CREDETIAL_ID}") {
-           // app.push("${env.BUILD_NUMBER}")//tag the image with the current build no.
-            app.push("${params.DOCKER_TAG}") // tag the image with the param tag
-			
-			}
 		} catch (e) {
 			// If there was an exception thrown, the build failed.
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
 			{
-			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Build & push image]")
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [ZICOS-Initialization]")
 			}
 			if (params.EMAIL_LIST?.trim())
 			{
-			notifyFailedBuild('Build & push image')
+			notifyFailedBuild('ZICOS-Initialization')
 			}
 			cleanup()
 			throw e
 			}
-		}
-		}
+	try {		
+  stage('Build image') {
+        
+		app = docker.build("${params.DOCKER_IMAGE_NAME}:${params.DOCKER_TAG}")
     }
-
+	} catch (e) {
+			// If there was an exception thrown, the build failed.
+			currentBuild.result = "FAILED"
+			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
+			{
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Build image]")
+			}
+			if (params.EMAIL_LIST?.trim())
+			{
+			notifyFailedBuild('Build image')
+			}
+			cleanup()
+			throw e
+			}
+	
+		try {
 			
-		
+		//Push the image into Docker hub	
+  stage('Push image') {
+        
+		docker.withRegistry("${params.DOCKERHUB_URL}", "${params.DOCKERHUB_CREDENTIAL_ID}") {
+            app.push("${env.BUILD_NUMBER}")//tag the image with the current build no.
+            app.push("${params.DOCKER_TAG}") // tag the image with the param tag
+			}
+		}
+		} catch (e) {
+			// If there was an exception thrown, the build failed
+			currentBuild.result = "FAILED"
+			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
+			{
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Push image]")
+			}
+			if (params.EMAIL_LIST?.trim())
+			{
+			notifyFailedBuild('Push image')
+			}
+			cleanup()
+			throw e
+			}
+			
+		try {
  stage('Create Bridge') {
- 
- steps { 
- script {
- try {
 			sh """
 			docker network create --driver bridge spadelite${env.BUILD_NUMBER}
 			"""
-			} catch (e) {
+			}
+		} catch (e) {
 			// If there was an exception thrown, the build failed
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
@@ -100,28 +118,24 @@ pipeline {
 			cleanup()
 			throw e
 			}
-			}
-			}
-		
-		}	
-
-			  
+			
+//Pull the image from Docker hub.			
+			docker.withRegistry("${params.DOCKERHUB_URL}", "${params.DOCKERHUB_CREDENTIAL_ID}") {
+             docker.image("${params.DOCKER_IMAGE_NAME}:${params.DOCKER_TAG}").inside("--net spadelite${env.BUILD_NUMBER} -u root -d --publish 6000:6000") 
+			 {
+			  try {
 				
  stage('Checkout code'){
- 
- steps { 
- script {
- try {
-			 
-			 checkout(	[$class                          : 'GitSCM',
+			 // checkout the code 
+		checkout(	[$class                          : 'GitSCM',
 				  branches                         : [[name: '*/master']],
 				  doGenerateSubmoduleConfigurations: false,
 				  extensions                       : [],
 				  submoduleCfg                     : [],
-				  userRemoteConfigs                : [[credentialsId: "${params.GIT_CREDETIAL_ID}",
+				  userRemoteConfigs                : [[credentialsId: "${params.GIT_CREDENTIAL_ID}",
 				  url          					   : "${params.GIT_URL}"]]])
-			 
-			 } catch (e) {
+			 }
+			} catch (e) {
 			// If there was an exception thrown, the build failed
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
@@ -135,35 +149,18 @@ pipeline {
 			cleanup()
 			throw e
 			}
-			 }
-			 }
-			}
 			 
-			 
+			 try {
 				
  stage('Build NPM'){
-
- 
- steps { 
- script {
- try {
- docker.withRegistry("${params.DOCKERHUB_URL}", "${params.DOCKERHUB_CREDETIAL_ID}") {
-             docker.image("${params.DOCKER_IMAGE_NAME}:${params.DOCKER_TAG}").inside("--net spadelite${env.BUILD_NUMBER} -u root -d --publish 6000:6000") 
-			 {
- checkout(	[$class                          : 'GitSCM',
-				  branches                         : [[name: '*/master']],
-				  doGenerateSubmoduleConfigurations: false,
-				  extensions                       : [],
-				  submoduleCfg                     : [],
-				  userRemoteConfigs                : [[credentialsId: "${params.GIT_CREDETIAL_ID}",
-				  url          					   : "${params.GIT_URL}"]]])
-			sh """
+			 sh """
 			
 			npm install -g #Build the code using NPM
 			
 			npm install sonarqube-scanner --save-dev #install sonarqube-scanner
 			 """ 
-		}}	 } catch (e) {
+			 }
+			 } catch (e) {
 			// If there was an exception thrown, the build failed
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
@@ -177,30 +174,11 @@ pipeline {
 			cleanup()
 			throw e
 			}
-			 }
-			 }
 			 
-	}		 
-			 
+			 try {
 			 			 
  stage('Sonar Analysis'){
- 
- 
- steps { 
- script {
- try {
- docker.withRegistry("${params.DOCKERHUB_URL}", "${params.DOCKERHUB_CREDETIAL_ID}") {
-             docker.image("${params.DOCKER_IMAGE_NAME}:${params.DOCKER_TAG}").inside("--net spadelite${env.BUILD_NUMBER} -u root -d --publish 6000:6000") 
-			 {
- checkout(	[$class                          : 'GitSCM',
-				  branches                         : [[name: '*/master']],
-				  doGenerateSubmoduleConfigurations: false,
-				  extensions                       : [],
-				  submoduleCfg                     : [],
-				  userRemoteConfigs                : [[credentialsId: "${params.GIT_CREDETIAL_ID}",
-				  url          					   : "${params.GIT_URL}"]]])
- 
-	 withSonarQubeEnv('sonarqube') {
+	withSonarQubeEnv('sonarqube') {
 			 sh """
 			 
 			 
@@ -223,7 +201,8 @@ pipeline {
 			  timeout(time: 1, unit: 'HOURS') {
                 waitForQualityGate abortPipeline: true
               }
-	}} } catch (e) {
+			 }
+			 } catch (e) {
 			// If there was an exception thrown, the build failed
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
@@ -237,32 +216,18 @@ pipeline {
 			cleanup()
 			throw e
 			}
-	 }
-			 }
-			 }
-			 
-		stage('Unit testing using mocha'){
-		
-  steps { 
-  script {
-  try {
-  
-  docker.withRegistry("${params.DOCKERHUB_URL}", "${params.DOCKERHUB_CREDETIAL_ID}") {
-             docker.image("${params.DOCKER_IMAGE_NAME}:${params.DOCKER_TAG}").inside("--net spadelite${env.BUILD_NUMBER} -u root -d --publish 6000:6000") 
-			 {
-  checkout(	[$class                          : 'GitSCM',
-				  branches                         : [[name: '*/master']],
-				  doGenerateSubmoduleConfigurations: false,
-				  extensions                       : [],
-				  submoduleCfg                     : [],
-				  userRemoteConfigs                : [[credentialsId: "${params.GIT_CREDETIAL_ID}",
-				  url          					   : "${params.GIT_URL}"]]])
-			sh """
+			
+						
+			try {
+			
+  stage('Unit testing using mocha'){
+			 sh """
 			 npm install supertest --save-dev
 			 mocha tests/test.js --reporter spec 
 			 
 			 """ 
-		}}	} catch (e) {
+			 }
+			 } catch (e) {
 			// If there was an exception thrown, the build failed
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
@@ -276,29 +241,9 @@ pipeline {
 			cleanup()
 			throw e
 			}
-			}
-			 
-			 }
-		}	
-						
 			
-			
-					 
+			try {		 
   stage('Push artifacts to Artifactory'){
-  
-  steps { 
-  script {
-  try {
-  docker.withRegistry("${params.DOCKERHUB_URL}", "${params.DOCKERHUB_CREDETIAL_ID}") {
-             docker.image("${params.DOCKER_IMAGE_NAME}:${params.DOCKER_TAG}").inside("--net spadelite${env.BUILD_NUMBER} -u root -d --publish 6000:6000") 
-			 {
-  checkout(	[$class                          : 'GitSCM',
-				  branches                         : [[name: '*/master']],
-				  doGenerateSubmoduleConfigurations: false,
-				  extensions                       : [],
-				  submoduleCfg                     : [],
-				  userRemoteConfigs                : [[credentialsId: "${params.GIT_CREDETIAL_ID}",
-				  url          					   : "${params.GIT_URL}"]]])
 			sh """
 			touch ${env.JOB_NAME}${env.BUILD_NUMBER}.tar.gz
 			tar --exclude='./node_modules' --exclude='./.scannerwork' --exclude='./.git' --exclude='./.gitignore' --exclude=${env.JOB_NAME}${env.BUILD_NUMBER}.tar.gz -zcvf ${env.JOB_NAME}${env.BUILD_NUMBER}.tar.gz .
@@ -316,7 +261,10 @@ pipeline {
 			{
 			notifySuccessBuild()
 			}
-		} }	} catch (e) {
+			cleanup()
+			 }
+			 
+			 } catch (e) {
 			// If there was an exception thrown, the build failed
 			currentBuild.result = "FAILED"
 			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
@@ -329,22 +277,15 @@ pipeline {
 			}
 			cleanup()
 			throw e
-			}
-			}
-
 			} 
-			post { 
-        always { 
-		    cleanup()  //perform clean up
-            cleanWs() //cleanup workspace
-        }
-}
-        }
-		
-		
-    }
-    }
-	def notifySlack(String slackUrl,String slackChannel,String slackToken,String message) {
+			
+          }
+         }
+  
+  }     
+
+  // function to handle the Slack notification.
+  def notifySlack(String slackUrl,String slackChannel,String slackToken,String message) {
 		sh """
 		curl -X POST -H 'Authorization: Bearer ${slackToken}' \
 		-H 'Content-type: application/json' \
@@ -352,6 +293,7 @@ pipeline {
 		${slackUrl}
 		"""
 		}
+		
 // function to handle the failed build notification.
 		def notifyFailedBuild(String stage) {
 		
