@@ -6,21 +6,21 @@ node {
 	
 	properties([
      parameters([
-	    stringParam(name: 'DOCKERHUB_URL', defaultValue: '', description: 'Dockerhub Url'),
-        stringParam(name: 'DOCKERHUB_CREDENTIAL_ID', defaultValue: '', description: 'Dockerhub CredentialId'),
-		stringParam(name: 'GIT_CREDENTIAL_ID', defaultValue: '', description: 'GIT CredentialId'),
-		stringParam(name: 'DOCKER_IMAGE_NAME', defaultValue: '', description: 'Docker Image Name'),
-		stringParam(name: 'DOCKER_TAG', defaultValue: '', description: 'Docker Image Tag'),
-		stringParam(name: 'GIT_URL', defaultValue: '', description: 'Git Url'),
-		stringParam(name: 'SONARQUBE_URL', defaultValue: '', description: 'SonarQube Url'),
-		stringParam(name: 'SONARQUBE_PROJECT_NAME', defaultValue: '', description: 'SonarQube Project Name'),
-		stringParam(name: 'JFROG_CREDENTIAL_ID', defaultValue: '', description: 'JFrog repository password'),
-		stringParam(name: 'JFROG_URL', defaultValue: '', description: 'JFrog repository URL'),
-		stringParam(name: 'SLACK_API_URL', defaultValue: '', description: 'Slack API URL'),
-		stringParam(name: 'SLACK_TOKEN', defaultValue: '', description: 'Slack token'),
-		stringParam(name: 'SLACK_CHANNEL_NAME', defaultValue: '', description: 'Slack channel name'),
-		stringParam(name: 'EMAIL_LIST', defaultValue: '', description: 'Email distribution list'),
-		stringParam(name: 'CALLED_BY', defaultValue: '', description: 'Called by'),
+	    stringParam(name: 'DOCKERHUB_URL', defaultValue: 'https://registry.hub.docker.com', description: 'Dockerhub Url'),
+        stringParam(name: 'DOCKERHUB_CREDENTIAL_ID', defaultValue: 'prince11itc', description: 'Dockerhub CredentialId'),
+		stringParam(name: 'GIT_CREDENTIAL_ID', defaultValue: 'pm11prince', description: 'GIT CredentialId'),
+		stringParam(name: 'DOCKER_IMAGE_NAME', defaultValue: 'prince11itc/node-base-img', description: 'Docker Image Name'),
+		stringParam(name: 'DOCKER_TAG', defaultValue: 'latest', description: 'Docker Image Tag'),
+		stringParam(name: 'GIT_URL', defaultValue: 'https://github.com/pm11prince/code-repo.git', description: 'Git Url'),
+		stringParam(name: 'SONARQUBE_URL', defaultValue: 'http://ec2-54-156-240-215.compute-1.amazonaws.com:9000/', description: 'SonarQube Url'),
+		stringParam(name: 'SONARQUBE_PROJECT_NAME', defaultValue: 'Node-Project', description: 'SonarQube Project Name'),
+		stringParam(name: 'JFROG_CREDENTIAL_ID', defaultValue: 'itc11jfrog', description: 'JFrog repository password'),
+		stringParam(name: 'JFROG_URL', defaultValue: 'http://ec2-34-238-216-133.compute-1.amazonaws.com:8081/artifactory/Test-Repo/', description: 'JFrog repository URL'),
+		stringParam(name: 'SLACK_API_URL', defaultValue: 'https://slack.com/api/chat.postMessage', description: 'Slack API URL'),
+		stringParam(name: 'SLACK_TOKEN', defaultValue: 'xoxp-255797318066-255280261521-464228562405-78ec4e9b7ebffc14a4f98a77969ae385', description: 'Slack token'),
+		stringParam(name: 'SLACK_CHANNEL_NAME', defaultValue: 'cisco-pipeline', description: 'Slack channel name'),
+		stringParam(name: 'EMAIL_LIST', defaultValue: 'prince.mathew@itcinfoetch.com', description: 'Email distribution list'),
+		stringParam(name: 'CALLED_BY', defaultValue: 'ZICOS', description: 'Called by'),
         stringParam(name: 'URL', defaultValue: '',description: 'Callback URL')
      ])
    ])
@@ -267,7 +267,7 @@ if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CH
 			{
 			notifySuccessBuild()
 			}
-			cleanup()
+			
 			 }
 			 
 			 } catch (e) {
