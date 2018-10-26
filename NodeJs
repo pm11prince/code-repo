@@ -31,7 +31,7 @@ pipeline {
 		}
             }
             steps {
-                sh "curl -X GET ${params.URL}/pipeline/execution?url=${JENKINS_URL}&jobName=${JOB_NAME}"
+                sh "curl -user super_user@zicos.co:password -X GET ${params.URL}/pipeline/execution?url=${JENKINS_URL}&jobName=${JOB_NAME}"
             }
         }
 
