@@ -15,12 +15,12 @@ node {
 		stringParam(name: 'SONARQUBE_URL', defaultValue: '', description: 'SonarQube Url'),
 		stringParam(name: 'SONARQUBE_PROJECT_NAME', defaultValue: '', description: 'SonarQube Project Name'),
 		stringParam(name: 'JFROG_CREDENTIAL_ID', defaultValue: '', description: 'JFrog repository password'),
-		stringParam(name: 'JFROG_URL', defaultValue: '', description: 'JFrog repository URL')
-		stringParam(name: 'SLACK_API_URL', defaultValue: '', description: 'Slack API URL')
-		stringParam(name: 'SLACK_TOKEN', defaultValue: '', description: 'Slack token')
-		stringParam(name: 'SLACK_CHANNEL_NAME', defaultValue: '', description: 'Slack channel name')
-		stringParam(name: 'EMAIL_LIST', defaultValue: '', description: 'Email distribution list')
-		stringParam(name: 'CALLED_BY', defaultValue: '', description: 'Called by')
+		stringParam(name: 'JFROG_URL', defaultValue: '', description: 'JFrog repository URL'),
+		stringParam(name: 'SLACK_API_URL', defaultValue: '', description: 'Slack API URL'),
+		stringParam(name: 'SLACK_TOKEN', defaultValue: '', description: 'Slack token'),
+		stringParam(name: 'SLACK_CHANNEL_NAME', defaultValue: '', description: 'Slack channel name'),
+		stringParam(name: 'EMAIL_LIST', defaultValue: '', description: 'Email distribution list'),
+		stringParam(name: 'CALLED_BY', defaultValue: '', description: 'Called by'),
         stringParam(name: 'URL', defaultValue: '',description: 'Callback URL')
      ])
    ])
