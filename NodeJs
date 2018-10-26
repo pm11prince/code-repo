@@ -19,7 +19,8 @@ pipeline {
 		string(name: 'SLACK_CHANNEL_NAME', defaultValue: '', description: 'Slack channel name')
 		string(name: 'EMAIL_LIST', defaultValue: '', description: 'Email distribution list')
 		string(name: 'CALLED_BY', defaultValue: '', description: 'Called by')
-        string(name: 'URL', defaultValue: '',description: 'Callback URL')
+	        string(name: 'ZICOS_CREDENTIAL_ID', defaultValue: 'ZICOS')
+                string(name: 'URL', defaultValue: '',description: 'Callback URL')
 
 		}
   stages {
@@ -31,7 +32,13 @@ pipeline {
 		}
             }
             steps {
-                sh "curl --user super_user@zicos.co:password -X GET ${params.URL}/pipeline/execution?url=${jenkins_url}'&'jobName=${JOB_NAME}"
+                script{
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ZICOS',
+                    usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        def url = "${JENKINS_URL}".substring(0, "${JENKINS_URL}".length() - 1)
+                        sh "curl --user $USERNAME:$PASSWORD -X GET ${params.URL}/pipeline/execution?url=${url}'&'jobName=${JOB_NAME}"
+		    }
+                }
             }
         }
 
