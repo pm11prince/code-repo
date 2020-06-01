@@ -65,7 +65,7 @@ pipeline {
 			echo props['major']
 			 echo props['minor']
 			 echo props['patch']
-		 echo ${env.GIT_COMMIT}
+		 	echo "${env.GIT_COMMIT}"
 			 
 		}
 		}
