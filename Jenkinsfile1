@@ -1,0 +1,111 @@
+#!/usr/bin/env groovy
+def app
+pipeline {
+  agent any
+  //All parameters which will be used to run the pipeline.
+  parameters {
+		string(name: 'DOCKERHUB_URL', defaultValue: '', description: 'Dockerhub Url')
+        string(name: 'DOCKERHUB_CREDETIAL_ID', defaultValue: '', description: 'Dockerhub CredentialId')
+		string(name: 'GIT_CREDETIAL_ID', defaultValue: '', description: 'GIT CredentialId')
+		string(name: 'DOCKER_IMAGE_NAME', defaultValue: '', description: 'Docker Image Name')
+		string(name: 'DOCKER_TAG', defaultValue: '', description: 'Docker Image Tag')
+		string(name: 'GIT_URL', defaultValue: '', description: 'Git Url')
+		string(name: 'SONARQUBE_URL', defaultValue: '', description: 'SonarQube Url')
+		string(name: 'SONARQUBE_PROJECT_NAME', defaultValue: '', description: 'SonarQube Project Name')
+		string(name: 'JFROG_CREDENTIAL_ID', defaultValue: '', description: 'JFrog repository CredentialId')
+		string(name: 'JFROG_URL', defaultValue: '', description: 'JFrog repository URL')
+		string(name: 'SLACK_API_URL', defaultValue: '', description: 'Slack API URL')
+		string(name: 'SLACK_TOKEN', defaultValue: '', description: 'Slack token')
+		string(name: 'SLACK_CHANNEL_NAME', defaultValue: '', description: 'Slack channel name')
+		string(name: 'EMAIL_LIST', defaultValue: '', description: 'Email distribution list')
+		string(name: 'CALLED_BY', defaultValue: '', description: 'Called by')
+        string(name: 'URL', defaultValue: '',description: 'Callback URL')
+		string(name: 'ZICOS_CREDENTIAL_ID', defaultValue: '')
+		}
+  stages {
+	
+				
+ stage('Checkout code'){
+ 
+ steps { 
+ script {
+ try {
+			 
+			 checkout(	[$class                          : 'GitSCM',
+				  branches                         : [[name: '*/master']],
+				  doGenerateSubmoduleConfigurations: false,
+				  extensions                       : [],
+				  submoduleCfg                     : [],
+				  userRemoteConfigs                : [[credentialsId: "${params.GIT_CREDETIAL_ID}",
+				  url          					   : "${params.GIT_URL}"]]])
+			 
+			 } catch (e) {
+			// If there was an exception thrown, the build failed
+			currentBuild.result = "FAILED"
+			if(params.SLACK_API_URL?.trim() && params.SLACK_TOKEN?.trim() && params.SLACK_CHANNEL_NAME?.trim())
+			{
+			notifySlack(params.SLACK_API_URL,params.SLACK_CHANNEL_NAME,params.SLACK_TOKEN,"Build Failed: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] Failed stage: [Checkout code]")
+			}
+			if (params.EMAIL_LIST?.trim())
+			{
+			notifyFailedBuild('Checkout code')
+			}
+			cleanup()
+			throw e
+			}
+			 }
+			 }
+			}
+	
+	stage('Read Version'){
+ 
+	 steps { 
+	 script {
+			def props = readJSON file: '${workspace}/version.json'
+			echo props['major']
+			 
+		}
+		}
+		}
+	
+	
+    }
+    }
+	def notifySlack(String slackUrl,String slackChannel,String slackToken,String message) {
+		sh """
+		curl -X POST -H 'Authorization: Bearer ${slackToken}' \
+		-H 'Content-type: application/json' \
+		--data '{"username":"ZICOS","channel":"${slackChannel}","text": "${message}"}' \
+		${slackUrl}
+		"""
+		}
+// function to handle the failed build notification.
+		def notifyFailedBuild(String stage) {
+		
+		emailext(
+		  to: "${params.EMAIL_LIST}",
+		  subject: "Build Failed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+		  body: "This email is to notify that Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' has been failed. Failed stage: [${stage}]"
+		)
+		}
+		
+// function to handle successful build notification.
+		def notifySuccessBuild() {
+		
+		emailext(
+		  to: "${params.EMAIL_LIST}",
+		  subject: "Build Success: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+		  body: "This email is to notify that Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' has been completed successfully"
+		)
+		}
+
+//function to clean docker container, volumes and network		
+		def cleanup() {
+		cleanWs() //cleanup workspace
+		sh """
+		docker ps -q -f status=exited | xargs --no-run-if-empty docker rm
+		docker images -q -f dangling=true | xargs --no-run-if-empty docker rmi
+		docker volume ls -qf dangling=true | xargs -r docker volume rm
+		docker network rm spadelite${env.BUILD_NUMBER}
+		"""
+		}
