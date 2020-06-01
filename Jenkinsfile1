@@ -63,6 +63,9 @@ pipeline {
 	 script {
 			def props = readJSON file: "${env.WORKSPACE}/version.json"
 			echo props['major']
+			 echo props['minor']
+			 echo props['patch']
+		 echo ${env.GIT_COMMIT}
 			 
 		}
 		}
