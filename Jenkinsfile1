@@ -61,7 +61,7 @@ pipeline {
  
 	 steps { 
 	 script {
-			def props = readJSON file: "${env.WORKSPACE}\\version.json"
+			def props = readJSON file: "${env.WORKSPACE}/version.json"
 			echo props['major']
 			 
 		}
