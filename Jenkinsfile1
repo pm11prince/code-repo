@@ -66,6 +66,8 @@ pipeline {
 			 echo props['minor']
 			 echo props['patch']
 		 	echo "${env.GIT_COMMIT}"
+		 //def tag = shell(returnStdout: true, script: 'git tag --sort version:refname | tail -1').trim()
+		 shell "git tag -fa ${releaseVersion.normalVersion} -m 'Release version ${releaseVersion.normalVersion}'"
 			 
 		}
 		}
