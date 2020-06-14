@@ -4,8 +4,8 @@ pipeline {
   agent any
   //All parameters which will be used to run the pipeline.
 	environment {
-	VERSION=readJSON file: "${env.WORKSPACE}/version.json"
-	VERSION1=VERSION['major']+"."+VERSION['minor']+"."+VERSION['patch']	
+	//VERSION=readJSON file: "${env.WORKSPACE}/version.json"
+	VERSION=getVersion()	
 	}
 	parameters {
 		string(name: 'DOCKERHUB_URL', defaultValue: '', description: 'Dockerhub Url')
@@ -119,3 +119,10 @@ pipeline {
 		docker network rm spadelite${env.BUILD_NUMBER}
 		"""
 		}
+@NonCPS
+def getVersion() {
+def props = readJSON file: "${env.WORKSPACE}/version.json"
+def version =""
+version=props['major']+"."+props['minor']+"."+props['patch']
+return version	
+}
