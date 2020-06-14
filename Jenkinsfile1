@@ -5,6 +5,7 @@ pipeline {
   //All parameters which will be used to run the pipeline.
 	environment {
 	VERSION=readJSON file: "${env.WORKSPACE}/version.json"
+	VERSION1=VERSION['major']+"."+VERSION['minor']+"."+VERSION['patch']	
 	}
 	parameters {
 		string(name: 'DOCKERHUB_URL', defaultValue: '', description: 'Dockerhub Url')
@@ -64,7 +65,7 @@ pipeline {
  
 	 steps { 
 	 script {
-		 echo "$VERSION['major']"
+		 echo "$VERSION1"
 			//def props = readJSON file: "${env.WORKSPACE}/version.json"
 			//echo props['major']
 			// echo props['minor']
