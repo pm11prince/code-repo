@@ -5,7 +5,7 @@ pipeline {
   //All parameters which will be used to run the pipeline.
 	environment {
 	COMMITID="ci2fa"	
-	VERSION=getVersion()	
+	VERSION=getVersion()+"."+COMMITID	
 	}
 	parameters {
 		string(name: 'DOCKERHUB_URL', defaultValue: '', description: 'Dockerhub Url')
@@ -123,7 +123,7 @@ pipeline {
 def getVersion() {
 def props = readJSON file: "${env.WORKSPACE}/version.json"
 def version =""
-version=props['major']+"."+props['minor']+"."+props['patch']+"."+currentBuild.getId()+"."+"${COMMITID}"
+version=props['major']+"."+props['minor']+"."+props['patch']+"."+currentBuild.getId()
 echo "version: "+version
 return version	
 }
