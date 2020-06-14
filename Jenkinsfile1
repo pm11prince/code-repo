@@ -123,6 +123,6 @@ def getVersion() {
 def props = readJSON file: "${env.WORKSPACE}/version.json"
 def version =""
 version=props['major']+"."+props['minor']+"."+props['patch']
-echo "version: "+$version
+echo "version: "+version
 return version	
 }
