@@ -4,7 +4,6 @@ pipeline {
   agent any
   //All parameters which will be used to run the pipeline.
 	environment {
-	//VERSION=readJSON file: "${env.WORKSPACE}/version.json"
 	VERSION=getVersion()	
 	}
 	parameters {
