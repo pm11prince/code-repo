@@ -74,7 +74,7 @@ pipeline {
 		 //def tag = shell(returnStdout: true, script: 'git tag --sort version:refname | tail -1').trim()
 		 sh """
 		 git tag -fa "${env.GIT_COMMIT}" -m 'Release version ${env.GIT_COMMIT}'
-		 git push https://"prince:prince123"@github.com/pm11prince/code-repo.git "${env.GIT_COMMIT}"  
+		 git push https://"pm11prince:gitpass@123"@github.com/pm11prince/code-repo.git "${env.GIT_COMMIT}"  
 		 //git push origin refs/tags/0.0.1^{commit}:refs/heads/new_branch
 		 """
 			 
