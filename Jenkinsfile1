@@ -72,7 +72,11 @@ pipeline {
 			// echo props['patch']
 		 	echo "${env.GIT_COMMIT}"
 		 //def tag = shell(returnStdout: true, script: 'git tag --sort version:refname | tail -1').trim()
-		 //shell "git tag -fa "88d3bd027a6e35185ccc2458b9cf516bc7f2fe64" -m 'Release version 88d3bd027a6e35185ccc2458b9cf516bc7f2fe64'"
+		 sh """
+		 git tag -fa "${env.GIT_COMMIT}" -m 'Release version ${env.GIT_COMMIT}'
+		 git push https://"prince:prince123"@github.com/pm11prince/code-repo.git "${env.GIT_COMMIT}"  
+		 //git push origin refs/tags/0.0.1^{commit}:refs/heads/new_branch
+		 """
 			 
 		}
 		}
