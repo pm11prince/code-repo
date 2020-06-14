@@ -123,7 +123,7 @@ pipeline {
 def getVersion() {
 def props = readJSON file: "${env.WORKSPACE}/version.json"
 def version =""
-version=props['major']+"."+props['minor']+"."+props['patch']+"."+currentBuild.getId()+"."+"${env.COMMITID}"
+version=props['major']+"."+props['minor']+"."+props['patch']+"."+currentBuild.getId()+"."+"${COMMITID}"
 echo "version: "+version
 return version	
 }
