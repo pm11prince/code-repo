@@ -118,7 +118,7 @@ pipeline {
 		docker network rm spadelite${env.BUILD_NUMBER}
 		"""
 		}
-@NonCPS
+//@NonCPS
 def getVersion() {
 def props = readJSON file: "${env.WORKSPACE}/version.json"
 def version =""
