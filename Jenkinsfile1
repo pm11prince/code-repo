@@ -77,7 +77,11 @@ pipeline {
 		 git push https://"pm11prince:gitpass@123"@github.com/pm11prince/code-repo.git "${env.GIT_COMMIT}"  
 		 //git push origin refs/tags/0.0.1^{commit}:refs/heads/new_branch
 		 """
-			 
+		withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "ZICOS-Dev-Access",
+						usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+							"curl -u '$USERNAME:$PASSWORD -d {"mapi":"1.1.0","dapi":"1.1.0","assetman":"1.1.0"} -H Content-Type:application/xml -X POST http://ec2-18-217-180-36.us-east-2.compute.amazonaws.com:8080/zicos-dev-api/metadata/7?projectId=101"
+					}
+		 echo "data saved successfully"
 		}
 		}
 		}
