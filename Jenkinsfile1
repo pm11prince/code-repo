@@ -83,7 +83,7 @@ pipeline {
 		 def version="1.1.0"
 		withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "ZICOS-Dev-Access",
 						usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							sh "curl -u $USERNAME:$PASSWORD -F file=@/tmp/test.json -H Content-Type:application/json -X POST http://ec2-18-217-180-36.us-east-2.compute.amazonaws.com:8080/zicos-dev-api/metadata/7?projectId=101"
+							sh "curl -u $USERNAME:$PASSWORD -d @/tmp/test.json -H Content-Type:application/json -X POST http://ec2-18-217-180-36.us-east-2.compute.amazonaws.com:8080/zicos-dev-api/metadata/7?projectId=101"
 					}
 		 echo "data saved successfully"
 		}
